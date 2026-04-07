@@ -19,10 +19,18 @@ M   = "\033[1;35m"
 DIM = "\033[2m"
 RST = "\033[0m"
 
+# ── Dynamic Terminal Helpers ──────────────────────
+def tw():
+    try: return shutil.get_terminal_size().columns
+    except: return 80
+
+HANDSHAKE_EVENT = threading.Event()
+
+
 # ── Paths ─────────────────────────────────────────
 SCRIPT_DIR    = os.path.dirname(os.path.realpath(__file__))
 CONFIG_FILE   = os.path.join(SCRIPT_DIR, "config", "system.txt")
-CAP_DIR       = os.path.join(SCRIPT_DIR, "captures")
+CAP_DIR       = os.path.join(SCRIPT_DIR, "captures", "handshake")
 CRACKED_DIR   = os.path.join(SCRIPT_DIR, "captures", "cracked")
 TMP_DIR       = os.path.join(SCRIPT_DIR, "tmp")
 TMP_SCAN      = os.path.join(TMP_DIR, "scan")
@@ -132,12 +140,18 @@ def cprint(text, color="", end="\n"):
     print(" " * pad + color + text + (RST if color else "") , end=end)
 
 def head(text):
-    width = min(tw() - 4, 60)
-    dash_line = "─" * width
-    cprint(dash_line, M)
-    cprint(text, M)
-    cprint(dash_line, M)
     print()
+    cprint(text, M)
+    print()
+
+def print_success_box(title, rows):
+    """Prints centered success information without borders."""
+    print("\n" * 2)
+    cprint(f"✅  {title}", G)
+    print()
+    for k, v in rows:
+        cprint(f"{k} : {v}", W)
+    print("\n")
 
 # ── Banner ────────────────────────────────────────
 BANNER_ART = [
@@ -580,6 +594,20 @@ def cleanup_empty_caps():
         info(f"Deleted {W}{len(confirmed_empty)}{RST} empty file(s).")
     print()
 
+def monitor_handshake(bssid, cap_file):
+    def _mon():
+        start = time.time()
+        while not HANDSHAKE_EVENT.is_set():
+            if has_handshake(cap_file, reliable=True):
+                HANDSHAKE_EVENT.set()
+                break
+            if time.time() - start > 600: # 10 min timeout
+                break
+            time.sleep(3)
+    threading.Thread(target=_mon, daemon=True).start()
+
+
+
 # ── Script writers (Red Team) ─────────────────────
 def write_deauth_script():
     banner_raw = r"""
@@ -713,19 +741,28 @@ def normal_handshake(iface, cfg):
         ["airodump-ng", "--bssid", bssid, "-c", channel, "--write", cap_prefix, mon_iface],
         preexec_fn=lambda: signal.signal(signal.SIGINT, signal.SIG_IGN)
     )
+    HANDSHAKE_EVENT.clear()
     monitor_handshake(bssid, cap_file)
     try:
-        dump_proc.wait()
-    except KeyboardInterrupt:
-        dump_proc.send_signal(signal.SIGTERM)
-        dump_proc.wait()
-        time.sleep(1)
+        while not HANDSHAKE_EVENT.is_set():
+            dump_proc.wait(timeout=1)
+    except (KeyboardInterrupt, subprocess.TimeoutExpired):
+        pass
+    
+    dump_proc.send_signal(signal.SIGTERM)
+    dump_proc.wait()
     print()
-    if os.path.exists(cap_file):
-        info(f"Handshake file: {G}{cap_file}{RST}")
+
+    if HANDSHAKE_EVENT.is_set():
+        print_success_box("WPA HANDSHAKE CAPTURED!", [
+            ("BSSID", bssid),
+            ("File", os.path.basename(cap_file))
+        ])
+        print(f"  {Y}Attack complete. Press ENTER to return to menu...{RST}")
+        input()
     else:
-        warn(f"Cap file not found — check manually.")
-    info("Auto-restoring interface...")
+        warn("Handshake not captured. Auto-restoring...")
+    
     restore_interface(mon_iface)
 
 def advanced_handshake(iface, cfg):
@@ -774,21 +811,28 @@ def advanced_handshake(iface, cfg):
     info(f"Deauth + Capture terminals running.")
     info(f"Watching for handshake in {W}{os.path.basename(cap_file)}{RST}...")
     warn(f"Press {W}Ctrl+C{RST}{Y} to stop everything.\n")
+    HANDSHAKE_EVENT.clear()
     monitor_handshake(bssid, cap_file)
     try:
-        while True: time.sleep(1)
+        while not HANDSHAKE_EVENT.is_set():
+            time.sleep(1)
     except KeyboardInterrupt:
         pass
+
     remove_trigger()
     if os.path.exists(READY_FILE): os.remove(READY_FILE)
     info("Deauth stopped.")
-    time.sleep(1)
-    print()
-    if os.path.exists(cap_file):
-        info(f"Handshake file: {G}{cap_file}{RST}")
+    
+    if HANDSHAKE_EVENT.is_set():
+        print_success_box("WPA HANDSHAKE CAPTURED!", [
+            ("BSSID", bssid),
+            ("File", os.path.basename(cap_file))
+        ])
+        print(f"  {Y}Attack complete. Press ENTER to return to menu...{RST}")
+        input()
     else:
-        warn(f"Cap file not found — check manually.")
-    info("Auto-restoring interface...")
+        warn("Manual stop. Auto-restoring...")
+
     restore_interface(mon_iface)
 
 def deauth_attack(iface, cfg):
@@ -959,19 +1003,22 @@ def crack_handshake(cfg):
     if pwd:
         ssid = os.path.basename(cap_file).replace("-01.cap", "").replace(".cap", "")
         out = save_cracked_result(cap_file, ssid, pwd)
-        print(f"\n  {G}{'█'*47}")
-        print(f"  ██   ✅  PASSWORD CRACKED!                  ██")
-        print(f"  ██   SSID     : {ssid:<30}██")
-        print(f"  ██   Password : {pwd:<30}██")
-        print(f"  ██   Saved to : {os.path.basename(out):<30}██")
-        print(f"  {'█'*47}{RST}\n")
+        print_success_box("PASSWORD CRACKED!", [
+            ("SSID", ssid),
+            ("Password", pwd),
+            ("Saved to", os.path.basename(out))
+        ])
+        print(f"  {Y}Press ENTER to return to menu...{RST}")
+        input()
     else:
         warn("Password not found. Try a different wordlist.")
+        pause()
 
 def restore_only(iface, cfg):
     banner()
     head("RED TEAM – RESTORE INTERFACE")
     restore_interface(iface)
+    pause()
 
 def list_captures():
     banner()
@@ -980,6 +1027,7 @@ def list_captures():
     caps = sorted([f for f in glob.glob(os.path.join(CAP_DIR, "*.cap")) if os.path.isfile(f)])
     if not caps:
         warn(f"No captures found in {W}{CAP_DIR}{RST}")
+        pause()
         return
     results = checker.check_multiple(caps, reliable=False)
     print(f"  {W}{'#':<4} {'FILE':<35} {'SIZE':<10} HANDSHAKE{RST}")
@@ -992,6 +1040,7 @@ def list_captures():
         hs = f"{G}✅ YES{RST}" if results.get(cap, False) else f"{R}✗  NO{RST}"
         print(f"  {C}{i:<4}{RST}{fname:<35} {size_str:<10} {hs}")
     print(f"\n  {DIM}Location: {CAP_DIR}{RST}")
+    pause()
 
 def list_cracked():
     banner()
@@ -999,6 +1048,7 @@ def list_cracked():
     files = sorted(glob.glob(os.path.join(CRACKED_DIR, "*_cracked.txt")))
     if not files:
         warn(f"No cracked passwords found in {W}{CRACKED_DIR}{RST}")
+        pause()
         return
     print(f"  {W}{'#':<4} {'SSID':<25} {'PASSWORD':<25} DATE{RST}")
     print(f"  {DIM}{'─'*70}{RST}")
@@ -1014,6 +1064,7 @@ def list_cracked():
         date = time.strftime("%Y-%m-%d", time.localtime(os.path.getmtime(f)))
         print(f"  {C}{i:<4}{RST}{ssid:<25} {G}{pwd:<25}{RST} {DIM}{date}{RST}")
     print(f"\n  {DIM}Location: {CRACKED_DIR}{RST}")
+    pause()
 
 # ══════════════════════════════════════════════════
 #  BLUE TEAM – SENTINEL MONITORING MODULE (Modular)
