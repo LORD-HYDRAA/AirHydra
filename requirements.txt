@@ -1,0 +1,36 @@
+# AirHydra Requirements
+# Format: tool_name|apt_pkg|pacman_pkg|dnf_pkg|description
+# Use "source" if package must be built from source
+# Use "manual" if requires special installation
+
+# ── Wireless & Cracking ──────────────────────────
+airmon-ng|aircrack-ng|aircrack-ng|aircrack-ng|WiFi monitor mode
+airodump-ng|aircrack-ng|aircrack-ng|aircrack-ng|WiFi packet capture
+aireplay-ng|aircrack-ng|aircrack-ng|aircrack-ng|WiFi packet injection
+aircrack-ng|aircrack-ng|aircrack-ng|aircrack-ng|WPA handshake cracking
+iw|iw|iw|iw|Wireless device control
+iwconfig|wireless-tools|wireless_tools|wireless-tools|Wireless basic config
+hashcat|hashcat|hashcat|hashcat|GPU accelerated cracking
+hcxpcapngtool|hcxtools|hcxtools|hcxtools|Handshake conversion
+tshark|tshark|wireshark-cli|wireshark-cli|Packet dissection
+
+# ── System Utilities ─────────────────────────────
+ip|iproute2|iproute2|iproute2|IP management
+modprobe|kmod|kmod|kmod|Kernel modules
+systemctl|systemd|systemd|systemd|Service manager
+lsb_release|lsb-release|lsb-release|lsb_release|Distro info
+python3|python3|python|python3|Python interpreter
+python3-pip|python3-pip|python-pip|python3-pip|Python package manager
+xterm|xterm|xterm|xterm|Fallback terminal
+nmcli|network-manager|networkmanager|NetworkManager|NetworkManager CLI
+
+# ── Core & Network ───────────────────────────────
+grep|grep|grep|grep|Pattern matching
+awk|gawk|gawk|gawk|Text processing
+sed|sed|sed|sed|Stream editor
+cut|coreutils|coreutils|coreutils|Text extraction
+ps|procps|procps-ng|procps-ng|Process management
+curl|curl|curl|curl|Data transfer
+wget|wget|wget|wget|File downloader
+7z|p7zip-full|p7zip|p7zip|Archive utility
+git|git|git|git|Version control
