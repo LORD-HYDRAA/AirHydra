@@ -20,7 +20,7 @@ modprobe|kmod|kmod|kmod|Kernel modules
 systemctl|systemd|systemd|systemd|Service manager
 lsb_release|lsb-release|lsb-release|lsb_release|Distro info
 python3|python3|python|python3|Python interpreter
-python3-pip|python3-pip|python-pip|python3-pip|Python package manager
+# python3-pip|python3-pip|python-pip|python3-pip|Python package manager
 xterm|xterm|xterm|xterm|Fallback terminal
 nmcli|network-manager|networkmanager|NetworkManager|NetworkManager CLI
 
