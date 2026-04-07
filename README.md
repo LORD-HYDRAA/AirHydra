@@ -1,8 +1,10 @@
 # AirHydra — The Unified Wi-Fi Security Framework
 
 <div align="center">
-
-```text
+<table>
+<tr>
+<td>
+<pre>
   ___    _               _   _               _                
  / _ \  (_)             | | | |             | |               
 / /_\ \  _   _ __       | |_| |  _   _    __| |  _ __    __ _ 
@@ -11,8 +13,10 @@
 \_| |_/ |_| |_|         \_| |_/  \__, |  \__,_| |_|     \__,_|
                                  __/ |                       
                                 |___/                        
-```
-
+</pre>
+</td>
+</tr>
+</table>
 </div>
 
 **AirHydra** is a professional, hardware-aware Wi-Fi security framework built in Python and Bash. Designed for the "New Generation" of Red Teaming, it merges powerful automated reconnaissance with high-speed handshake cracking.
