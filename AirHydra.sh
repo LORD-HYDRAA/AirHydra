@@ -24,21 +24,40 @@ warn()  { echo -e "  ${Y}[!]${RST} $1"; }
 err()   { echo -e "  ${R}[✗]${RST} $1"; }
 step()  { echo -e "  ${C}[»]${RST} $1"; }
 
+c_print() {
+    local text="$1"
+    local color="$2"
+    local width=$(tput cols 2>/dev/null || echo 80)
+    local plain=$(echo -e "$text" | sed 's/\033\[[0-9;]*m//g')
+    local pad=$(( (width - ${#plain}) / 2 ))
+    [ $pad -lt 0 ] && pad=0
+    printf "%${pad}s" ""
+    echo -e "${color}${text}${RST}"
+}
+
 # ── Banner ───────────────────────────────────────
 banner() {
     clear
-    echo -e "${R}"
-    echo '   ___    _               _   _               _                '
-    echo '  / _ \  (_)             | | | |             | |               '
-    echo ' / /_\ \  _   _ __       | |_| |  _   _    __| |  _ __    __ _ '
-    echo "|  _  | | | | '__|      |  _  | | | | |  / _\` | | '__|  / _\` |"
-    echo '| | | | | | | |         | | | | | |_| | | (_| | | |    | (_| |'
-    echo '\_| |_/ |_| |_|         \_| |_/  \__, |  \__,_| |_|     \__,_|'
-    echo '                                  __/ |                       '
-    echo '                                 |___/                        '
-    echo -e "${RST}${DIM}  ╔══════════════════════════════════════════╗"
-    echo    "  ║   WiFi Auditing Tool v1.0  │ Lord-Hydra  ║"
-    echo -e "  ╚══════════════════════════════════════════╝${RST}"
+    local lines=(
+        "  ___    _               _   _               _                "
+        " / _ \  (_)             | | | |             | |               "
+        "/ /_\ \  _   _ __       | |_| |  _   _    __| |  _ __    __ _ "
+        "|  _  | | | | '__|      |  _  | | | | |  / _\` | | '__|  / _\` |"
+        "| | | | | | | |         | | | | | |_| | | (_| | | |    | (_| |"
+        "\_| |_/ |_| |_|         \_| |_/  \__, |  \__,_| |_|     \__,_|"
+        "                                 __/ |                       "
+        "                                |___/                        "
+    )
+    echo ""
+    for l in "${lines[@]}"; do c_print "$l" "$R"; done
+    
+    local tagline="╔═══════════════════════════════════════════════════════╗"
+      local inner="║    Wireless Security Framework (Red+Blue) │ Lord-Hydra║"
+       local tail="╚═══════════════════════════════════════════════════════╝"
+    
+    c_print "$tagline" "$DIM"
+    c_print "$inner"   "$DIM"
+    c_print "$tail"    "$DIM"
     echo ""
 }
 
@@ -143,9 +162,9 @@ detect_terminal() {
 check_requirements() {
     local family="$1"
     echo ""
-    echo -e "  ${M}─────────────────────────────────────────────"
-    echo    "  CHECKING REQUIREMENTS"
-    echo -e "  ─────────────────────────────────────────────${RST}"
+    c_print "────────────────────────────────────────────────────────────" "$M"
+    c_print "                   CHECKING REQUIREMENTS                      " ""
+    c_print "────────────────────────────────────────────────────────────" "$M"
     echo ""
 
     local missing=()
@@ -220,9 +239,9 @@ check_requirements() {
 # ── Build config ─────────────────────────────────
 build_config() {
     echo ""
-    echo -e "  ${M}─────────────────────────────────────────────"
-    echo    "  FIRST RUN — Building System Config"
-    echo -e "  ─────────────────────────────────────────────${RST}"
+    c_print "────────────────────────────────────────────────────────────" "$M"
+    c_print "              FIRST RUN — Building System Config             " ""
+    c_print "────────────────────────────────────────────────────────────" "$M"
     echo ""
 
     mkdir -p "$CONFIG_DIR"
