@@ -1,4 +1,4 @@
-# AirHydra — The Unified Wi-Fi Security Framework
+<h1 align="center">AirHydra — The Unified Wi-Fi Security Framework</h1>
 
 <div align="center">
 <table>
@@ -18,7 +18,7 @@
 </tr>
 </table>
 
-**Wireless Security Framework (Red+Blue) │ Lord-Hydra**
+**Wireless Security Framework (Red+Blue) │ Lord-Hydra │**
 </div>
 
 ---
@@ -136,4 +136,4 @@ AirHydra is developed with strict adherence to legal and security standards.
 - **[LIMITATIONS](LIMITATIONS.md)**: Technical boundaries and legal constraints.
 
 ---
-**Developed with ❤️ for the Offensive & Defensive Security Communities.**
+**Developed By Lord Hydra (Mohemmed Zaid Khan) for the Offensive & Defensive Security Communities.**
