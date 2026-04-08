@@ -1,4 +1,4 @@
-# AirHydra — The Unified Wi-Fi Security Framework (R+B)
+# AirHydra — The Unified Wi-Fi Security Framework
 
 <div align="center">
 <table>
