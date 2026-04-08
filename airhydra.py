@@ -920,13 +920,13 @@ def pick_crack_method(cfg):
     print()
     if gpu_avail == "yes":
         info(f"GPU detected — enabling advanced modes {W}⚡{RST}")
-        print(f"  {W}[1]{RST}  Hashcat CPU      {DIM}(-D 1){RST}")
-        print(f"  {W}[2]{RST}  Hashcat GPU      {DIM}(-D 2){RST}")
-        print(f"  {W}[3]{RST}  Hashcat Hybrid   {DIM}(-D 1,2){RST}")
+        print(f"  {W}[1]{RST}  Hashcat CPU      {DIM}{RST}")
+        print(f"  {W}[2]{RST}  Hashcat GPU      {DIM}{RST}")
+        print(f"  {W}[3]{RST}  Hashcat Hybrid   {DIM}{RST}")
         valid = ["1", "2", "3"]
     else:
         warn("No compatible GPU found — using CPU mode only")
-        print(f"  {W}[1]{RST}  Hashcat CPU      {DIM}(-D 1){RST}")
+        print(f"  {W}[1]{RST}  Hashcat CPU      {DIM}{RST}")
         valid = ["1"]
     
     print()
@@ -1625,7 +1625,7 @@ def red_team_menu(iface, cfg):
         print()
         print(f"  {W}[2]{RST}  Advanced Handshake (Auto Deauth)")
         print()
-        print(f"  {W}[3]{RST}  Deauth Attack (may not work on 5GHz)")
+        print(f"  {W}[3]{RST}  Deauth Attack")
         print()
         print(f"  {W}[4]{RST}  Crack Handshake")
         print()
